@@ -41,7 +41,7 @@ public class SpawnManager : MonoBehaviour
     {
         List<SpawnPoint> _spawnPoints = new List<SpawnPoint>(_sharedSpawnPoints.Count);
         CalculateDistancesForSpawnPoints(team);
-        GetSpawnPointsByDistanceSpawning(/*Please add appropriate parameters here*/);
+        GetSpawnPointsByDistanceSpawning(team, ref _spawnPoints);
         if (_spawnPoints.Count <= 0)
         {
             GetSpawnPointsBySquadSpawning(team, ref _spawnPoints);
@@ -51,9 +51,33 @@ public class SpawnManager : MonoBehaviour
         return spawnPoint;
     }
 
-    private void GetSpawnPointsByDistanceSpawning(/*Please add appropriate parameters here*/)
+    private void GetSpawnPointsByDistanceSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
     {
-		//Please apply your algorithm here
+        if (suitableSpawnPoints == null)
+        {
+            suitableSpawnPoints = new List<SpawnPoint>();
+        }
+        suitableSpawnPoints.Clear();
+        _sharedSpawnPoints.Sort(delegate (SpawnPoint a, SpawnPoint b)
+        {
+            if (a.DistanceToClosestEnemy == b.DistanceToClosestEnemy)
+            {
+                return 0;
+            }
+            if (a.DistanceToClosestEnemy < b.DistanceToClosestEnemy)
+            {
+                return 1;
+            }
+            return -1;
+        });
+        for (int i = 0; i < _sharedSpawnPoints.Count && _sharedSpawnPoints[i].DistanceToClosestEnemy >= _minDistanceToClosestEnemy; i++)
+        {
+            if (!(_sharedSpawnPoints[i].DistanceToClosestFriend <= _minMemberDistance) && !(_sharedSpawnPoints[i].DistanceToClosestEnemy <= _minMemberDistance) && _sharedSpawnPoints[i].SpawnTimer <= 0)
+            {
+                suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
+            }
+        }
+        Debug.Log(suitableSpawnPoints.Count);
     }
 
     private void GetSpawnPointsBySquadSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
