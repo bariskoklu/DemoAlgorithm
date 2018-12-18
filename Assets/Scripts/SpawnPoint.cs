@@ -5,8 +5,8 @@ using UnityEngine;
 public class SpawnPoint : MonoBehaviour
 {
 	public Transform PointTransform { get; private set; }
-	private float _distanceToClosestEnemy;
-	private float _distanceToClosestFriend;
+	[SerializeField]private float _distanceToClosestEnemy;
+	[SerializeField]private float _distanceToClosestFriend;
 
 	public float SpawnTimer { get; private set; }
 

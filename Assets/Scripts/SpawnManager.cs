@@ -23,6 +23,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private float _minDistanceToClosestEnemy = 10;
     [Tooltip("This value is to prevent friendly player spawning on top of eachothers. If a player is within the range of this value to a spawn point, that spawn point will be ignored")]
     [SerializeField] private float _minMemberDistance = 2;
+    [SerializeField] private List<SpawnPoint> _spawnPoints;
 
 
     public DummyPlayer PlayerToBeSpawned;
@@ -38,14 +39,14 @@ public class SpawnManager : MonoBehaviour
     #region SPAWN ALGORITHM
     public SpawnPoint GetSharedSpawnPoint(PlayerTeam team)
     {
-        List<SpawnPoint> spawnPoints = new List<SpawnPoint>(_sharedSpawnPoints.Count);
+        List<SpawnPoint> _spawnPoints = new List<SpawnPoint>(_sharedSpawnPoints.Count);
         CalculateDistancesForSpawnPoints(team);
         GetSpawnPointsByDistanceSpawning(/*Please add appropriate parameters here*/);
-        if (spawnPoints.Count <= 0)
+        if (_spawnPoints.Count <= 0)
         {
-            GetSpawnPointsBySquadSpawning(team, ref spawnPoints);
+            GetSpawnPointsBySquadSpawning(team, ref _spawnPoints);
         }
-        SpawnPoint spawnPoint = spawnPoints.Count <= 1 ? spawnPoints[0] : spawnPoints[_random.Next(0, (int)((float)spawnPoints.Count * .5f))];
+        SpawnPoint spawnPoint = _spawnPoints.Count <= 1 ? _spawnPoints[0] : _spawnPoints[_random.Next(0, (int)((float)_spawnPoints.Count * .5f))];
         spawnPoint.StartTimer();
         return spawnPoint;
     }
@@ -99,12 +100,13 @@ public class SpawnManager : MonoBehaviour
 
     private float GetDistanceToClosestMember(Vector3 position, PlayerTeam playerTeam)
     {
+        _closestDistance = 0;
         foreach (var player in DummyPlayers)
         {
             if (!player.Disabled && player.PlayerTeamValue != PlayerTeam.None && player.PlayerTeamValue == playerTeam && !player.IsDead())
             {
                 float playerDistanceToSpawnPoint = Vector3.Distance(position, player.Transform.position);
-                if (playerDistanceToSpawnPoint < _closestDistance)
+                if (playerDistanceToSpawnPoint < _closestDistance || _closestDistance == 0)
                 {
                     _closestDistance = playerDistanceToSpawnPoint;
                 }
