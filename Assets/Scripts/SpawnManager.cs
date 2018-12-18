@@ -29,6 +29,10 @@ public class SpawnManager : MonoBehaviour
     public DummyPlayer PlayerToBeSpawned;
     public DummyPlayer[] DummyPlayers;
 
+    /// <summary>
+	/// Script ilk yüklendiğinde(oyun başlamadan önce), _sharedSpawnPoints listesini SpawnPoint tipindeki objelerin hepsiyle dolduruyoruz. 
+	/// Aynı şekilde DummyPlayers arrayini de DummyPlayer tipindeki objelerin hepsiyle dolduruyoduruz.
+	/// </summary>
     private void Awake()
     {
 		_sharedSpawnPoints.AddRange(FindObjectsOfType<SpawnPoint>());
@@ -37,6 +41,17 @@ public class SpawnManager : MonoBehaviour
     }
 
     #region SPAWN ALGORITHM
+
+    /// <summary>
+	/// Algoritmanın başladığı ilk yer. Buttona basılınca çağırılan fonksiyon.
+	/// SpawnPoints adında bir değişken yaratılıyor. Bu değişken oyuncunun spawn olacağı yeri tutan bir variable. _sharedSpawnPoints'dan farkı ise _sharedSpawnPoints bütün spawn noktalarını tutarken,
+    /// SpawnPoints sadece o ana uygunları, o an gidilebilicek spawn noktalarını tutuyor.
+    /// CalculateDistancesForSpawnPoints() methodu çağırılıyor. Bu metotda bütün spawn noktalarının _distanceToClosestEnemy, _distanceToClosesFriend değişkenleri dolduruluyor.
+    /// Bu metodun içinde ilk ve ikinci filtre çağırılıyor. Burda yapılan şey ise ilk filtre(GetSpawnPointsByDistanceSpawning) düşmana olan uzaklığa göre SpawnPointsin doldurulduğu metot.
+    /// Eğer bu methoddan herhangi bir spawn noktası gelmezse yani herhangi bir nokta kriterlere uymadıysa, GetSpawnPointsBySquadSpawning() metodu devreye giriyor. Bu metot bizim ikinci filtremiz.
+    /// Bu filtrede spawnPoints takım arkadaşlarına olan yakınlığa göre dolduruluyor.
+    /// En son olarak spawnPoint değişkeni spawnPoints listesi tek elemanlıysa o elemanına eşitleniyor eğer spawnPointsde birden çok eleman varsa 0 ile ortadaki eleman arasındaki elemanlardan rastgele birine eşitleniyor.
+	/// </summary>
     public SpawnPoint GetSharedSpawnPoint(PlayerTeam team)
     {
         List<SpawnPoint> _spawnPoints = new List<SpawnPoint>(_sharedSpawnPoints.Count);
@@ -50,7 +65,13 @@ public class SpawnManager : MonoBehaviour
         spawnPoint.StartTimer();
         return spawnPoint;
     }
-
+    /// <summary>
+    /// Bu metot bizim ilk filtremiz. spawnPoints listesini boşaltıyoruz. Ve bütün spawn pointlerinin olduğu listeyi düşmana olan uzaklığı en fazla olan spawn noktası başta olacak şekilde sıralıyoruz.
+    /// Bundan sonra ise, bütün spawn noktalarından en yakın düşman mesafesi, belirlediğimiz minimum mesafeden fazla olan noktalar kadar dönen bir for döngüsü açıyoruz.
+    /// Bu döngünün içindeki if yapısında şuan dönen _sharedSpawnPoint elemanının DistanceToClosestFriend özelliğinin belirlediğimiz _minMemberDistance'dan(minimum olabilicek mesafe, spawn point ile DummyPlayer arası) fazla olmasına,
+    /// Aynı şekilde DistanceToClosestEnemy'ye de bakıyoruz ve son olarak SpawnTimer'ın(bir yerde spawn olduktan sonra devreye giren timer) 0'a eşit veya 0 dan küçük olup olmadığına bakıyoruz.
+    /// Bütün koşullar sağlanıyor ise, mevcut dönmekte olan _sharedSpawnPoints(bütün spawn noktaları) elemanını spawnPoints listemize ekliyoruz.
+    /// </summary>
     private void GetSpawnPointsByDistanceSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
     {
         if (suitableSpawnPoints == null)
