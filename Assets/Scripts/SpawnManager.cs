@@ -77,6 +77,7 @@ public class SpawnManager : MonoBehaviour
                 suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
             }
         }
+        suitableSpawnPoints.Reverse();
         Debug.Log(suitableSpawnPoints.Count);
     }
 
