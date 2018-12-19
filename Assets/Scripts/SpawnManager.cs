@@ -71,6 +71,7 @@ public class SpawnManager : MonoBehaviour
     /// Bu döngünün içindeki if yapısında şuan dönen _sharedSpawnPoint elemanının DistanceToClosestFriend özelliğinin belirlediğimiz _minMemberDistance'dan(minimum olabilicek mesafe, spawn point ile DummyPlayer arası) fazla olmasına,
     /// Aynı şekilde DistanceToClosestEnemy'ye de bakıyoruz ve son olarak SpawnTimer'ın(bir yerde spawn olduktan sonra devreye giren timer) 0'a eşit veya 0 dan küçük olup olmadığına bakıyoruz.
     /// Bütün koşullar sağlanıyor ise, mevcut dönmekte olan _sharedSpawnPoints(bütün spawn noktaları) elemanını spawnPoints listemize ekliyoruz.
+    /// Eğer burda spawnPoints bulunduysa, bulunan spawn pointlere dair Debug loglar var. Bulunan bütün spawnPointsleri gösteriyor ve seçilecek olan spawnPointi de gösteriyor.
     /// </summary>
     private void GetSpawnPointsByDistanceSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
     {
@@ -129,6 +130,8 @@ public class SpawnManager : MonoBehaviour
     /// Burdaki for döngüsü ilk filtredeki for döngüsüyle benzer. İçindeki if birebir aynı. Sadece for loopunda DistanceToClosestEnemy yerine DistanceToClosestFriend'e bakılıyor ve burda 
     /// bütün spawn noktalarının en yakın düşman mesafesi, belirlediğimiz minimum mesafeden fazla olup olmadığına bakılıyor farklı olarak.
     /// Eğer hiçbir nokta uymadıysa kriterlere(bu bütün noktaları kullandığımızdan oluyor. Timerları bitmediği anlamına geliyor). Sıralanmış olarak spawn noktalarının tamamımın olduğu listedeki ilk elemana yani en yakın takım arkadaşının olduğu noktayı seçiyoruz.
+    /// Ayrıca bunun açıklaması debug log olarak da var.
+    /// Eğer burda spawnPoints bulunduysa, bulunan spawn pointlere dair Debug loglar var. Bulunan bütün spawnPointsleri gösteriyor ve seçilecek olan spawnPointi de gösteriyor. 
     /// </summary>
     private void GetSpawnPointsBySquadSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
     {
