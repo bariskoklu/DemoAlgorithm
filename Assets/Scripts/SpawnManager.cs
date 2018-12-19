@@ -93,15 +93,43 @@ public class SpawnManager : MonoBehaviour
         });
         for (int i = 0; i < _sharedSpawnPoints.Count && _sharedSpawnPoints[i].DistanceToClosestEnemy >= _minDistanceToClosestEnemy; i++)
         {
-            if (!(_sharedSpawnPoints[i].DistanceToClosestFriend <= _minMemberDistance) && !(_sharedSpawnPoints[i].DistanceToClosestEnemy <= _minMemberDistance) && _sharedSpawnPoints[i].SpawnTimer <= 0)
+            if (!(_sharedSpawnPoints[i].DistanceToClosestFriend <= _minMemberDistance) && !(_sharedSpawnPoints[i].DistanceToClosestEnemy <= _minMemberDistance))
             {
-                suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
+                if (_sharedSpawnPoints[i].SpawnTimer <= 0)
+                {
+                    suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
+                }
+                else
+                {
+                    Debug.Log("Bu nokta düşman filtresinde uygundu ancak şuan SpawnTimer süresinde:" + _sharedSpawnPoints[i].name + "  " + _sharedSpawnPoints[i].SpawnTimer);
+                }
             }
         }
         suitableSpawnPoints.Reverse();
-        Debug.Log(suitableSpawnPoints.Count);
-    }
+        if (suitableSpawnPoints.Count > 0)
+        {
+            Debug.Log("Seçilen noktalar: ");
+            foreach (var item in suitableSpawnPoints)
+            {
+                Debug.Log(item.name);
+            }
+            Debug.Log("Bu noktalar dışındaki noktalar seçilmedi çünkü düşman filtresindeki gereksinimlere uymadılar ve düşman filtresindeki gereksinimlere uyan nokta/noktalar olduğu için diğer filtrede test edilmediler");
 
+            Debug.Log("Bu nokta seçildi çünkü ilk filtredeki bütün gereksinimlere uyan noktalar içinde düşmana en yakın olan nokta." + suitableSpawnPoints[_random.Next(0, (int)((float)_spawnPoints.Count * .5f))].name);
+        }
+        else
+        {
+            Debug.Log("Düşman filtresine uyan herhangi bir eleman bulunamadı");
+        }
+
+    }
+    /// <summary>
+    /// Bu metot ise ikinci filtre. Bu metoda sadece ilk filtreden herhangi bir eleman gelmezse başvuruyoruz. Bu metodun genel amacı, spawn edilecek oyuncuyu takım arkadaşlarına olabildiğince yakın spawn etmek.
+    /// SpawnPoints listesini boşaltıyoruz. Bundan sonra ise bütün spawn noktalarının olduğun _sharedSpawnPoints listesini takım arkadaşlarına olan mesafenin kısalığına göre, en kısa olan en başta olmak üzere sıralıyoruz.
+    /// Burdaki for döngüsü ilk filtredeki for döngüsüyle benzer. İçindeki if birebir aynı. Sadece for loopunda DistanceToClosestEnemy yerine DistanceToClosestFriend'e bakılıyor ve burda 
+    /// bütün spawn noktalarının en yakın düşman mesafesi, belirlediğimiz minimum mesafeden fazla olup olmadığına bakılıyor farklı olarak.
+    /// Eğer hiçbir nokta uymadıysa kriterlere(bu bütün noktaları kullandığımızdan oluyor. Timerları bitmediği anlamına geliyor). Sıralanmış olarak spawn noktalarının tamamımın olduğu listedeki ilk elemana yani en yakın takım arkadaşının olduğu noktayı seçiyoruz.
+    /// </summary>
     private void GetSpawnPointsBySquadSpawning(PlayerTeam team, ref List<SpawnPoint> suitableSpawnPoints)
     {
         if (suitableSpawnPoints == null)
@@ -123,18 +151,41 @@ public class SpawnManager : MonoBehaviour
         });
         for (int i = 0; i < _sharedSpawnPoints.Count && _sharedSpawnPoints[i].DistanceToClosestFriend <= _maxDistanceToClosestFriend; i++)
         {
-            if (!(_sharedSpawnPoints[i].DistanceToClosestFriend <= _minMemberDistance) && !(_sharedSpawnPoints[i].DistanceToClosestEnemy <= _minMemberDistance) && _sharedSpawnPoints[i].SpawnTimer <= 0)
+            if (!(_sharedSpawnPoints[i].DistanceToClosestFriend <= _minMemberDistance) && !(_sharedSpawnPoints[i].DistanceToClosestEnemy <= _minMemberDistance))
             {
-                suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
+                if (_sharedSpawnPoints[i].SpawnTimer <= 0)
+                {
+                    suitableSpawnPoints.Add(_sharedSpawnPoints[i]);
+                }
+                else
+                {
+                    Debug.Log("Bu nokta takım arkadaşı filtresinde uygundu ancak şuan SpawnTimer süresinde:" + _sharedSpawnPoints[i].name + "  " + _sharedSpawnPoints[i].SpawnTimer);
+                }
             }
         }
         if (suitableSpawnPoints.Count <= 0)
         {
+            Debug.Log("Takım arkadaşı filtresine uygun herhangi bir eleman bulunamadı. Herhangi bir takım arkadaşına en yakın olan spawn noktası seçildi");
             suitableSpawnPoints.Add(_sharedSpawnPoints[0]);
+        }
+        else
+        {
+            Debug.Log("Seçilen noktalar: ");
+            foreach (var item in suitableSpawnPoints)
+            {
+                Debug.Log(item.name);
+            }
+            Debug.Log("Bu noktalar dışındaki noktalar seçilmedi çünkü takım arkadaşı filtresindeki gereksinimlere uymadılar.");
+
+            Debug.Log("Bu nokta seçildi çünkü ilk filtredeki bütün gereksinimlere uyan noktalar içinde takım arkadaşına en yakın olan nokta." + suitableSpawnPoints[_random.Next(0, (int)((float)_spawnPoints.Count * .5f))].name);
         }
 
     }
-
+    /// <summary>
+	/// Burada her bir spawn noktasının en yakın takım arkadaşına ve en yakın düşmana olan uzaklığını buluyoruz. İlk başta bütün spawn noktalarını dönen bir for döngüsü yapıyoruz.
+    /// GetDistanceToClosestMember'ı kullanarak her bir spawn noktası için bu fonksiyonu döndürüyoruz.
+    /// GetDistanceToClosestMember'a ikinci parametre olarak düşman için CalculateDistancesForSpawnPoints'e gelen playerTeam parametresinin karşı takımını veriyoruz.
+	/// </summary>
     private void CalculateDistancesForSpawnPoints(PlayerTeam playerTeam)
     {
         for (int i = 0; i < _sharedSpawnPoints.Count; i++)
@@ -143,7 +194,13 @@ public class SpawnManager : MonoBehaviour
             _sharedSpawnPoints[i].DistanceToClosestEnemy = GetDistanceToClosestMember(_sharedSpawnPoints[i].PointTransform.position, playerTeam == PlayerTeam.BlueTeam ? PlayerTeam.RedTeam : playerTeam == PlayerTeam.RedTeam ? PlayerTeam.BlueTeam : PlayerTeam.None);
         }
     }
-
+    /// <summary>
+    /// _closestDistance ı sıfırlıyoruz.
+	/// İlk başta DummyPlayer tipindeki elemanlara sahip olan listemizi dönüyoruz.
+    /// İlk if'de player'ın deaktif olmamasına, bir takıma mensub olmasına, bu takımın parametre gelen takıma eşit olmasına ve bu oyuncunun ölü olmamasına bakıyoruz.
+    /// Bütünü bunlar sağlanıyosa oyuncunun parametre ile gelen position'a(_sharedSpawnPoints listesinin bir elemanı) olan uzaklığına bakıyoruz.
+    /// Eğer elde ettiğimiz uzaklık şuana kadar olan uzaklıkların en düşüğü ise veya şuana kadar elde ettiğimiz uzaklık 0(başlangıc değeri, demek oluyorki şuan listenin ilk elemanındayız) ise şuana kadar olan uzaklıkların en düşüğüne elde ettiğimiz uzaklığı atıyoruz.
+	/// </summary>
     private float GetDistanceToClosestMember(Vector3 position, PlayerTeam playerTeam)
     {
         _closestDistance = 0;
